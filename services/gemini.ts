@@ -1,22 +1,30 @@
 /**
- * Gemini SDK 에이전트 루프: 사용자 메시지 전송, 도구 호출 반복 처리, 최종 텍스트 반환.
- * SRP: 모델·도구 오케스트레이션; 도구와 컨텍스트는 주입.
+ * Gemini 에이전트 진입점: LangGraph 기반 runAgentGraph 호출.
+ * SRP: 옵션 검증 및 그래프 실행 위임.
  */
 
-import { GoogleGenAI } from "@google/genai";
 import { geminiConfig, SYSTEM_INSTRUCTION } from "../config/gemini.js";
-import { toolDeclarations } from "./tools/declarations.js";
-import { toolExecutors, type ToolName } from "./tools/executor.js";
 import { buildProjectContext } from "./context.js";
+import { runAgentGraph } from "./agentGraph.js";
 
-const MAX_TURNS = 20;
+/** UI/저장소용 대화 턴 (텍스트만). */
+export interface HistoryMessage {
+  role: "user" | "assistant";
+  text: string;
+}
 
 export interface RunAgentOptions {
   workspaceRoot: string;
   userMessage: string;
   /** API 키(GUI/저장소). 없으면 env의 geminiConfig.apiKey 사용. */
   apiKey?: string;
+  /** 과거 대화 턴. 있으면 contents 앞에 넣어 컨텍스트로 사용. */
+  historyMessages?: HistoryMessage[];
   onToolCall?: (name: string, args: Record<string, unknown>) => void;
+  /** 그래프 노드 진입 시 (시각화용). */
+  onNodeEnter?: (node: string) => void;
+  /** 그래프 노드 이탈 시 (시각화용). */
+  onNodeExit?: (node: string) => void;
 }
 
 export interface ContentPart {
@@ -30,7 +38,7 @@ export interface ContentTurn {
   parts: ContentPart[];
 }
 
-function getSystemInstruction(workspaceRoot: string): string {
+export function getSystemInstruction(workspaceRoot: string): string {
   const base = SYSTEM_INSTRUCTION;
   if (!workspaceRoot.trim()) {
     return (
@@ -43,98 +51,5 @@ function getSystemInstruction(workspaceRoot: string): string {
 }
 
 export async function runAgent(options: RunAgentOptions): Promise<string> {
-  const { workspaceRoot, userMessage, apiKey: optionKey, onToolCall } = options;
-  const apiKey = (optionKey?.trim() || geminiConfig.apiKey)?.trim();
-  if (!apiKey) {
-    throw new Error(
-      "Gemini API 키를 등록해 주세요. (설정 또는 .env GEMINI_API_KEY)"
-    );
-  }
-
-  const ai = new GoogleGenAI({ apiKey });
-  const systemInstruction = getSystemInstruction(workspaceRoot);
-
-  const tools = [
-    {
-      functionDeclarations: toolDeclarations.map((d) => ({
-        name: d.name,
-        description: d.description,
-        parametersJsonSchema: d.parametersJsonSchema,
-      })),
-    },
-  ];
-
-  const contents: ContentTurn[] = [
-    { role: "user", parts: [{ text: userMessage }] },
-  ];
-
-  let turns = 0;
-  let lastText = "";
-
-  while (turns < MAX_TURNS) {
-    turns++;
-
-    const config: {
-      tools: typeof tools;
-      systemInstruction?: string;
-    } = { tools };
-    if (systemInstruction) config.systemInstruction = systemInstruction;
-
-    const response = await ai.models.generateContent({
-      model: geminiConfig.model,
-      contents: contents.map((c) => ({
-        role: c.role,
-        parts: c.parts.map((p) => {
-          if (p.text !== undefined) return { text: p.text };
-          if (p.functionCall) return { functionCall: p.functionCall };
-          if (p.functionResponse)
-            return { functionResponse: p.functionResponse };
-          return { text: "" };
-        }),
-      })),
-      config,
-    });
-
-    const candidate = response.candidates?.[0];
-    if (!candidate?.content?.parts?.length) {
-      lastText =
-        (response as { text?: string }).text ?? lastText ?? "No response.";
-      break;
-    }
-
-    const parts = candidate.content.parts;
-    const functionCalls = (
-      response as {
-        functionCalls?: Array<{ name: string; args: Record<string, unknown> }>;
-      }
-    ).functionCalls;
-
-    if (functionCalls && functionCalls.length > 0) {
-      contents.push({
-        role: "model",
-        parts: candidate.content.parts as ContentPart[],
-      });
-
-      const functionResponseParts: ContentPart[] = [];
-      const root = workspaceRoot.trim() || null;
-      for (const fc of functionCalls) {
-        onToolCall?.(fc.name, fc.args);
-        const result = root
-          ? toolExecutors[fc.name as ToolName]
-            ? await toolExecutors[fc.name as ToolName](root, fc.args)
-            : { error: `Unknown tool: ${fc.name}` }
-          : { error: "작업 디렉터리를 먼저 설정하세요." };
-        functionResponseParts.push({
-          functionResponse: { name: fc.name, response: { result } },
-        });
-      }
-      contents.push({ role: "user", parts: functionResponseParts });
-      continue;
-    }
-
-    lastText = (response as { text?: string }).text ?? "";
-    break;
-  }
-
-  return lastText || "(No final response.)";
+  return runAgentGraph(options);
 }

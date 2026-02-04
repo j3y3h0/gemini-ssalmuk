@@ -5,6 +5,10 @@ interface ElectronAPI {
   setApiKey: (key: string) => Promise<string>;
   getWorkspace: () => Promise<string>;
   setWorkspace: () => Promise<string>;
+  getHistory: (
+    workspaceRoot: string
+  ) => Promise<{ role: string; text: string }[]>;
+  clearHistory: (workspaceRoot: string) => Promise<void>;
   sendMessage: (
     message: string,
     workspaceRoot: string
@@ -13,6 +17,9 @@ interface ElectronAPI {
   >;
   onToolCall: (
     cb: (data: { name: string; args: string }) => void
+  ) => () => void;
+  onGraphEvent: (
+    cb: (data: { node: string; phase: "enter" | "exit" }) => void
   ) => () => void;
 }
 

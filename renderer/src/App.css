@@ -149,6 +149,22 @@ body {
   border: 1px solid #e0e0e0;
 }
 
+.graph-status {
+  font-size: 12px;
+  color: #555;
+  padding: 6px 0;
+  margin-bottom: 4px;
+}
+
+.graph-label {
+  color: #666;
+}
+
+.graph-current {
+  color: #1a73e8;
+  font-weight: 500;
+}
+
 .tool-status {
   min-height: 22px;
   font-size: 12px;

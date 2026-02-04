@@ -7,6 +7,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Store from "electron-store";
 import { runAgent } from "../services/gemini.js";
+import {
+  getHistory,
+  appendTurn,
+  clearHistory,
+} from "../services/conversationStore.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const store = new Store<{ workspaceRoot: string; geminiApiKey: string }>({
@@ -56,6 +61,13 @@ ipcMain.handle("apiKey:set", (_event, key: string) => {
   return store.get("geminiApiKey", "");
 });
 
+ipcMain.handle("history:get", (_event, workspaceRoot: string) =>
+  getHistory(workspaceRoot ?? "")
+);
+ipcMain.handle("history:clear", (_event, workspaceRoot: string) => {
+  clearHistory(workspaceRoot ?? "");
+});
+
 ipcMain.handle("workspace:get", () => store.get("workspaceRoot", ""));
 
 ipcMain.handle("workspace:set", async () => {
@@ -79,12 +91,16 @@ ipcMain.handle(
   > => {
     try {
       const apiKey = store.get("geminiApiKey", "");
+      const workspaceRoot = payload.workspaceRoot || "";
+      const historyMessages = getHistory(workspaceRoot);
+      const win = BrowserWindow.getAllWindows()[0];
       const text = await runAgent({
-        workspaceRoot: payload.workspaceRoot || "",
+        workspaceRoot,
         userMessage: payload.message,
         apiKey: apiKey || undefined,
+        historyMessages:
+          historyMessages.length > 0 ? historyMessages : undefined,
         onToolCall: (name, args) => {
-          const win = BrowserWindow.getAllWindows()[0];
           if (win && !win.isDestroyed()) {
             win.webContents.send("agent:toolCall", {
               name,
@@ -92,7 +108,18 @@ ipcMain.handle(
             });
           }
         },
+        onNodeEnter: (node) => {
+          if (win && !win.isDestroyed()) {
+            win.webContents.send("agent:graphEvent", { node, phase: "enter" });
+          }
+        },
+        onNodeExit: (node) => {
+          if (win && !win.isDestroyed()) {
+            win.webContents.send("agent:graphEvent", { node, phase: "exit" });
+          }
+        },
       });
+      appendTurn(workspaceRoot, payload.message, text);
       return { success: true, text };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);

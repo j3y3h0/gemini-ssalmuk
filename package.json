@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.gemini-ssalmuk.app",
-    "productName": "Gemini 코딩 에이전트",
+    "productName": "Gemini 코딩 쌀먹기",
     "directories": {
       "output": "release"
     },
@@ -25,7 +25,11 @@
       "node_modules/**/*"
     ],
     "win": {
-      "target": ["dir", "portable", "nsis"],
+      "target": [
+        "dir",
+        "portable",
+        "nsis"
+      ],
       "signAndEditExecutable": false
     },
     "nsis": {
@@ -39,6 +43,8 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.0.0",
+    "@langchain/core": "^1.1.19",
+    "@langchain/langgraph": "^1.1.3",
     "dotenv": "^16.4.5",
     "electron-store": "^8.1.0",
     "execa": "^9.5.2",
