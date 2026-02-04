@@ -1,0 +1,29 @@
+{
+  "name": "gemini-ssalmuk",
+  "version": "1.0.0",
+  "description": "Gemini coding agent with Electron GUI",
+  "main": "dist/main/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node scripts/copy-renderer.cjs",
+    "dev": "npm run build && electron .",
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "electron-store": "^8.1.0",
+    "execa": "^9.5.2",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.14.0",
+    "electron": "^28.2.0",
+    "typescript": "^5.5.0"
+  }
+}
