@@ -26,6 +26,37 @@ body {
   font-weight: 600;
 }
 
+.api-key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.api-key-label {
+  color: #666;
+  font-size: 13px;
+}
+
+.api-key-input {
+  width: 280px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.api-key-status-text {
+  font-size: 12px;
+  color: #0d652d;
+}
+
 .workspace-row {
   display: flex;
   align-items: center;

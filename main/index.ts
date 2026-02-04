@@ -9,7 +9,9 @@ import Store from "electron-store";
 import { runAgent } from "../services/gemini.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const store = new Store<{ workspaceRoot: string }>({ name: "gemini-ssalmuk" });
+const store = new Store<{ workspaceRoot: string; geminiApiKey: string }>({
+  name: "gemini-ssalmuk",
+});
 
 function getWindowUrl(): string {
   const isDev = process.env.NODE_ENV !== "production";
@@ -44,13 +46,20 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
+ipcMain.handle("apiKey:get", () => store.get("geminiApiKey", ""));
+ipcMain.handle("apiKey:set", (_event, key: string) => {
+  store.set("geminiApiKey", typeof key === "string" ? key : "");
+  return store.get("geminiApiKey", "");
+});
+
 ipcMain.handle("workspace:get", () => store.get("workspaceRoot", ""));
 
 ipcMain.handle("workspace:set", async () => {
   const result = await dialog.showOpenDialog({
     properties: ["openDirectory"],
   });
-  if (result.canceled || result.filePaths.length === 0) return store.get("workspaceRoot", "");
+  if (result.canceled || result.filePaths.length === 0)
+    return store.get("workspaceRoot", "");
   const dir = result.filePaths[0];
   store.set("workspaceRoot", dir);
   return dir;
@@ -61,15 +70,22 @@ ipcMain.handle(
   async (
     _event,
     payload: { message: string; workspaceRoot: string }
-  ): Promise<{ success: true; text: string } | { success: false; error: string }> => {
+  ): Promise<
+    { success: true; text: string } | { success: false; error: string }
+  > => {
     try {
+      const apiKey = store.get("geminiApiKey", "");
       const text = await runAgent({
         workspaceRoot: payload.workspaceRoot || "",
         userMessage: payload.message,
+        apiKey: apiKey || undefined,
         onToolCall: (name, args) => {
           const win = BrowserWindow.getAllWindows()[0];
           if (win && !win.isDestroyed()) {
-            win.webContents.send("agent:toolCall", { name, args: JSON.stringify(args) });
+            win.webContents.send("agent:toolCall", {
+              name,
+              args: JSON.stringify(args),
+            });
           }
         },
       });
