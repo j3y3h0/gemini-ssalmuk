@@ -8,7 +8,31 @@
     "build": "tsc && vite build",
     "dev": "npm run build && electron .",
     "start": "electron .",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win --dir",
+    "dist:win:installer": "npm run build && electron-builder --win",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.gemini-ssalmuk.app",
+    "productName": "Gemini 코딩 에이전트",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "preload/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": ["dir", "portable", "nsis"],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "forceCodeSigning": false
   },
   "keywords": [],
   "author": "",
@@ -29,6 +53,7 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
     "electron": "^28.2.0",
+    "electron-builder": "^26.7.0",
     "typescript": "^5.5.0",
     "vite": "^5.0.0"
   }

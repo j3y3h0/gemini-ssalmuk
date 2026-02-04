@@ -69,6 +69,13 @@ export default function App() {
     await loadApiKey();
   };
 
+  const handleDeleteApiKey = async () => {
+    await api.setApiKey("");
+    await loadApiKey();
+  };
+
+  const hasApiKey = apiKeyStatus === "등록됨";
+
   const handleSelectWorkspace = async () => {
     await api.setWorkspace();
     await loadWorkspace();
@@ -127,13 +134,17 @@ export default function App() {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                handleSaveApiKey();
+                hasApiKey ? handleDeleteApiKey() : handleSaveApiKey();
               }
             }}
             autoComplete="off"
           />
-          <button type="button" className="btn" onClick={handleSaveApiKey}>
-            저장
+          <button
+            type="button"
+            className="btn"
+            onClick={hasApiKey ? handleDeleteApiKey : handleSaveApiKey}
+          >
+            {hasApiKey ? "삭제" : "저장"}
           </button>
           <span className="api-key-status-text">{apiKeyStatus}</span>
         </div>

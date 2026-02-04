@@ -1,6 +1,6 @@
 /**
- * Electron entry point. In dev, run: npm run dev (builds then launches Electron).
- * This file is not used when Electron loads dist/main/index.js; it can be used for CLI tests.
+ * Electron 진입점. 개발 시 npm run dev (빌드 후 Electron 실행).
+ * Electron이 dist/main/index.js를 로드할 때는 사용되지 않음; CLI 테스트용으로 사용 가능.
  */
 
 import { runAgent } from "./services/gemini.js";

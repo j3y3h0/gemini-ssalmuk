@@ -1,6 +1,6 @@
 /**
- * Gemini SDK agent loop: send user message, handle function calls in a loop, return final text.
- * SRP: orchestrate model + tools; tools and context are injected.
+ * Gemini SDK 에이전트 루프: 사용자 메시지 전송, 도구 호출 반복 처리, 최종 텍스트 반환.
+ * SRP: 모델·도구 오케스트레이션; 도구와 컨텍스트는 주입.
  */
 
 import { GoogleGenAI } from "@google/genai";
@@ -14,7 +14,7 @@ const MAX_TURNS = 20;
 export interface RunAgentOptions {
   workspaceRoot: string;
   userMessage: string;
-  /** API key (GUI/store). If not set, falls back to geminiConfig.apiKey from env. */
+  /** API 키(GUI/저장소). 없으면 env의 geminiConfig.apiKey 사용. */
   apiKey?: string;
   onToolCall?: (name: string, args: Record<string, unknown>) => void;
 }

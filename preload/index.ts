@@ -1,5 +1,5 @@
 /**
- * Preload: expose only agent and workspace APIs to renderer via contextBridge.
+ * Preload: contextBridge로 에이전트·작업 디렉터리 API만 렌더러에 노출.
  */
 
 import { contextBridge, ipcRenderer } from "electron";

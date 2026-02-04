@@ -1,6 +1,6 @@
 /**
- * Gemini function declarations for the coding agent.
- * SRP: Define tool schemas only; execution is in executor.ts.
+ * 코딩 에이전트용 Gemini 함수 선언.
+ * SRP: 도구 스키마 정의만; 실행은 executor.ts에서.
  */
 
 export interface FunctionDeclarationSchema {

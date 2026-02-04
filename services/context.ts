@@ -1,6 +1,6 @@
 /**
- * Build full project context (tree + key file contents) for system instruction.
- * SRP: aggregate tree and file contents with token/size limits.
+ * 시스템 인스트럭션용 전체 프로젝트 컨텍스트(트리 + 핵심 파일 내용) 생성.
+ * SRP: 트리와 파일 내용을 토큰/크기 제한으로 집계.
  */
 
 import path from "node:path";
@@ -75,13 +75,14 @@ export function buildProjectContext(
         const full = path.join(dir, e.name);
         try {
           const raw = fs.readFileSync(full, "utf-8");
-          const content = raw.length > maxCharsPerFile
-            ? raw.slice(0, maxCharsPerFile) + "\n... (truncated)"
-            : raw;
+          const content =
+            raw.length > maxCharsPerFile
+              ? raw.slice(0, maxCharsPerFile) + "\n... (truncated)"
+              : raw;
           files.push({ rel, content });
           totalChars += content.length;
         } catch {
-          // skip unreadable
+          // 읽기 불가 시 스킵
         }
       } else if (!["node_modules", ".git", "dist", "build"].includes(e.name)) {
         collect(path.join(dir, e.name), rel);

@@ -1,5 +1,5 @@
 /**
- * Electron main process: window, IPC for agent and workspace, store for persistence.
+ * Electron 메인 프로세스: 창 생성, 에이전트/작업 디렉터리 IPC, 저장소 연동.
  */
 
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
@@ -13,10 +13,12 @@ const store = new Store<{ workspaceRoot: string; geminiApiKey: string }>({
   name: "gemini-ssalmuk",
 });
 
-/** Preload must be CommonJS; load from app path so source preload.cjs is used. */
+/** Preload는 CommonJS여야 함. 개발: cwd 기준; 패키징: 앱 루트는 __dirname/../.. (dist/main -> app). */
 function getPreloadPath(): string {
-  const appPath = process.env.ELECTRON_APP_PATH ?? process.cwd();
-  return path.join(appPath, "preload", "preload.cjs");
+  if (app.isPackaged) {
+    return path.join(__dirname, "..", "..", "preload", "preload.cjs");
+  }
+  return path.join(process.cwd(), "preload", "preload.cjs");
 }
 
 function getWindowUrl(): string {

@@ -1,5 +1,5 @@
 /**
- * Build a directory tree string for a workspace. SRP: tree representation only.
+ * 작업 디렉터리의 디렉터리 트리 문자열 생성. SRP: 트리 표현만 담당.
  */
 
 import path from "node:path";
@@ -38,12 +38,16 @@ export function buildProjectTree(
       return [];
     }
     entries = entries.filter(
-      (e) => !e.name.startsWith(".") || e.name === ".env" || e.name === ".env.example"
+      (e) =>
+        !e.name.startsWith(".") ||
+        e.name === ".env" ||
+        e.name === ".env.example"
     );
-    entries = entries.filter((e) => !e.isDirectory() || !ignoreDirs.has(e.name));
+    entries = entries.filter(
+      (e) => !e.isDirectory() || !ignoreDirs.has(e.name)
+    );
     entries.sort((a, b) => {
-      if (a.isDirectory() !== b.isDirectory())
-        return a.isDirectory() ? 1 : -1;
+      if (a.isDirectory() !== b.isDirectory()) return a.isDirectory() ? 1 : -1;
       return a.name.localeCompare(b.name);
     });
 
