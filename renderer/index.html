@@ -4,44 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gemini 코딩 에이전트</title>
-    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="header">
-      <h1>Gemini 코딩 에이전트</h1>
-      <div class="api-key-row">
-        <label for="api-key-input" class="api-key-label">API Key:</label>
-        <input
-          type="password"
-          id="api-key-input"
-          class="api-key-input"
-          placeholder="Gemini API 키 입력 후 저장"
-          autocomplete="off"
-        />
-        <button type="button" id="btn-save-api-key" class="btn">저장</button>
-        <span id="api-key-status" class="api-key-status-text"></span>
-      </div>
-      <div class="workspace-row">
-        <span class="workspace-label">작업 디렉터리:</span>
-        <span id="workspace-path" class="workspace-path">(미설정)</span>
-        <button type="button" id="btn-workspace" class="btn">폴더 선택</button>
-      </div>
-    </header>
-    <main class="main">
-      <div id="messages" class="messages"></div>
-      <div id="tool-status" class="tool-status" aria-live="polite"></div>
-      <div class="input-row">
-        <textarea
-          id="input"
-          class="input"
-          rows="2"
-          placeholder="요청을 입력하세요..."
-        ></textarea>
-        <button type="button" id="btn-send" class="btn btn-primary">
-          전송
-        </button>
-      </div>
-    </main>
-    <script src="app.js" type="module"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -13,11 +13,13 @@ const store = new Store<{ workspaceRoot: string; geminiApiKey: string }>({
   name: "gemini-ssalmuk",
 });
 
+/** Preload must be CommonJS; load from app path so source preload.cjs is used. */
+function getPreloadPath(): string {
+  const appPath = process.env.ELECTRON_APP_PATH ?? process.cwd();
+  return path.join(appPath, "preload", "preload.cjs");
+}
+
 function getWindowUrl(): string {
-  const isDev = process.env.NODE_ENV !== "production";
-  if (isDev) {
-    return path.join(__dirname, "..", "renderer", "index.html");
-  }
   return path.join(__dirname, "..", "renderer", "index.html");
 }
 
@@ -26,7 +28,7 @@ function createWindow(): void {
     width: 900,
     height: 700,
     webPreferences: {
-      preload: path.join(__dirname, "preload", "index.js"),
+      preload: getPreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
     },
